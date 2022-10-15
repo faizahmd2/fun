@@ -13,7 +13,7 @@
             font-family: Arial, Helvetica, sans-serif;
         }
         body {
-            padding: 30px;
+            margin: 15px;
             background: rgb(217, 235, 235);
         }
         .container {
@@ -44,6 +44,7 @@
         }
         .facts {
             margin-left: 20px;
+            /* margin: 0 30px; */
         }
 
         .facts b {
@@ -52,6 +53,12 @@
 
         .detail {
             color: #003be1;
+        }
+
+        @media only screen and (max-width: 600px) {
+            #animal_info_container img {
+                width: 21rem;
+            }
         }
 
     </style>
