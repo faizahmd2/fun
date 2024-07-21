@@ -67,44 +67,35 @@ function autocomplete(inp) {
         
         if (!val || val.length < 3) return false;
 
+        removeDefinition();
+
         // Get Matches of search text through datamuse api
         let getMatches = await loadMatches(val);
         var arr = [...getMatches];
         currentFocus = -1;
 
-        // Remove Definition (if opened)
-        removeDefinition();
+        // removeDefinition();
 
-        // create a DIV element that will contain the items (values)
         a = document.createElement("DIV");
         a.setAttribute("id", this.id + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
 
-        // append the DIV element as a child of the autocomplete container
         this.parentNode.appendChild(a);
         
         for (i = 0; i < arr.length; i++) {
-            // check if the item starts with the same letters as the text field value
             if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-                // create a DIV element for each matching element
                 b = document.createElement("DIV");
 
-                // make the matching letters bold
                 b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
                 b.innerHTML += arr[i].substr(val.length);
 
-                // insert an input field that will hold the current array item's value
                 b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
 
-                // execute a function when someone clicks on the item value (DIV element)
                 b.addEventListener("click", async function(e) {
-                    // insert the value for the autocomplete text field 
                     inp.value = this.getElementsByTagName("input")[0].value;
 
-                    // close the list of autocompleted values (or any other open lists of autocompleted values
                     closeAllLists();
 
-                    // Get definition of selected match through wikiMedia api
                     let definition = await getWikiDefinition(inp.value);
                     showDefinition(definition);
                 });
@@ -118,43 +109,34 @@ function autocomplete(inp) {
         var x = document.getElementById(this.id + "autocomplete-list");
         if (x) x = x.getElementsByTagName("div");
 
-        // Highlight matches on key up/down
         if((e.keyCode == 40 && (currentFocus++ || true)) || (e.keyCode == 38 && (currentFocus-- || true))) {
             addActive(x);
         }
-        
-        // On Keyboard Enter, simulate a click on the "active" item 
+
         if (e.keyCode == 13 && currentFocus > -1 && x) x[currentFocus].click();
     });
 
     // Highlight match text
     function addActive(x) {
-      /*a function to classify an item as "active":*/
       if (!x) return false;
-      /*start by removing the "active" class on all items:*/
       removeActive(x);
       if (currentFocus >= x.length) currentFocus = 0;
       if (currentFocus < 0) currentFocus = (x.length - 1);
-      /*add class "autocomplete-active":*/
       x[currentFocus].classList.add("autocomplete-active");
     }
 
     // Remove Highlighted match text
     function removeActive(x) {
-      /*a function to remove the "active" class from all autocomplete items:*/
       for (var i = 0; i < x.length; i++) {
         x[i].classList.remove("autocomplete-active");
       }
     }
     
-    /*execute a function when someone clicks in the document:*/
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });
     
     function closeAllLists(elmnt) {
-        /*close all autocomplete lists in the document,
-        except the one passed as an argument:*/
         var x = document.getElementsByClassName("autocomplete-items");
         for (var i = 0; i < x.length; i++) {
             if (elmnt != x[i] && elmnt != inp) {
@@ -185,12 +167,14 @@ function autocomplete(inp) {
     // API Integration
     async function loadMatches(search) {
         try {
+            LOADING.style.display = 'block';
             let url = baseUrls.datamuseMatch + '/sug?' + 's=' + search;
             if(MATCHES_DATA_MAX_LIMIT) url += '&max=' + MATCHES_DATA_MAX_LIMIT;
             if(!isWordSearch) url += '&v=enwiki';
 
             const res = await fetch(url);
             const data = await res.json();
+            LOADING.style.display = 'none';
             if(data && data.length) {
                 return data.map((el) => el.word);
             }
@@ -220,9 +204,9 @@ function autocomplete(inp) {
         reset();
         isWordSearch = this.checked;
         if(isWordSearch) {
-            inp.placeholder = 'Search word meaning...'
+            inp.placeholder = 'Search word meaning... type atleast 3 letter'
         } else {
-            inp.placeholder = 'Search for definition...'
+            inp.placeholder = 'Search for definition... type atleast 3 letter'
         }
     })
     
